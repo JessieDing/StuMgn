@@ -1,5 +1,6 @@
 package com.stumgn.dao;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,14 +12,11 @@ public class StudentDao extends BaseDao {
 	public List<Student> findAll() {
 		openConnection();
 		String sql = "select id,name,sex from tb_student";
-		List<Student> studentList = new ArrayList<>();
+		List<Student> studentList = null;
 		try {
 			pstmt = conn.prepareStatement(sql);
 			rs = pstmt.executeQuery();
-			// 包装数据
-			while(rs.next()){
-				studentList.add(new Student(rs.getInt("id"),rs.getString("name"),rs.getByte("sex")));
-			}
+			studentList = resulthandler(rs);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
@@ -93,6 +91,53 @@ public class StudentDao extends BaseDao {
 		} finally {
 			closeConnection();
 		}
+	}
+
+	public List<Student> findListByName(String name) {
+		openConnection();
+		String sql = "select id,name,sex from tb_student where name = ?";
+		List<Student> studentList = null;
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setObject(1, name);
+			rs = pstmt.executeQuery();
+			studentList = resulthandler(rs);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally{
+			closeConnection();
+		}
+		return studentList;
+	}
+
+	public List<Student> findListBySex(byte sex) {
+		openConnection();
+		String sql = "select id,name,sex from tb_student where sex = ?";
+		List<Student> studentList = null;
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setObject(1, sex);
+			rs = pstmt.executeQuery();
+			studentList = resulthandler(rs);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally{
+			closeConnection();
+		}
+		return studentList;
+	}
+	
+	private List<Student> resulthandler(ResultSet rs){
+		List<Student> studentList = new ArrayList<>();
+		// 包装数据
+		try {
+			while(rs.next()){
+				studentList.add(new Student(rs.getInt("id"),rs.getString("name"),rs.getByte("sex")));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return studentList;
 	}
 
 }

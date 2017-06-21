@@ -47,6 +47,15 @@
 		<servlet-name>student-update</servlet-name>
 		<url-pattern>/student/update</url-pattern>
 	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>student-search</servlet-name>
+		<servlet-class>com.stumgn.web.servlet.StudentSearchServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>student-search</servlet-name>
+		<url-pattern>/student/search</url-pattern>
+	</servlet-mapping>
 
 	<filter>
 		<filter-name>character-filter</filter-name>

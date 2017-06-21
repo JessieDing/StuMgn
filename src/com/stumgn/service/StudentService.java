@@ -7,7 +7,7 @@ import com.stumgn.dao.StudentDao;
 
 public class StudentService {
 	private StudentDao studentDao = new StudentDao();
-	
+
 	public List<Student> getAll() {
 		return studentDao.findAll();
 	}
@@ -26,6 +26,14 @@ public class StudentService {
 
 	public boolean update(Student student) {
 		return studentDao.update(student);
+	}
+
+	public List<Student> getByName(String name) {
+		return studentDao.findListByName(name);
+	}
+
+	public List<Student> getBySex(byte sex) {
+		return studentDao.findListBySex(sex);
 	}
 
 }
