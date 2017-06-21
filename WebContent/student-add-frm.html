@@ -1,0 +1,33 @@
+<div class="easyui-panel" data-options="border:false,fit:true" style="width: 100%; max-width: 400px; padding: 30px 60px;">
+	<form id="studentAddFrm" method="post">
+		<div style="margin-bottom: 20px">
+			<input class="easyui-textbox" name="name" label="姓名:" labelPosition="top" style="width: 100%; height: 52px">
+		</div>
+		<div style="margin-bottom: 20px">
+			<input type="radio" name="sex" value="1" checked="checked" />男
+			<input type="radio" name="sex" value="0" />女
+		</div>
+		<div>
+			<a href="javascript:studentAdd();" class="easyui-linkbutton" style="width: 100px; height: 32px">保存</a>
+			<a href="#" class="easyui-linkbutton" style="width: 100px; height: 32px">重置</a>
+		</div>
+	</form>
+</div>
+
+<script>
+	//添加学生
+	function studentAdd(){
+		$("#studentAddFrm").form("submit",{
+			url:"/stumgn/student/add",
+			success:function (data){
+				var result = JSON.parse(data);
+				if(result.code == 200){
+					studentDgInit();
+					$("#studentAddWin").window("close");
+				}else if(result.code == 400){
+					$.messager.alert("提示","添加失败","error");
+				}
+			}
+		});
+	}
+</script>

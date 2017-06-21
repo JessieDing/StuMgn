@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>综合案例</title>
+    <script src="/stumgn/jslib/jquery-3.2.1.min.js"></script>
+    <style>
+        *{
+            padding: 0;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <table id="stu-dg" border="1">
+        <tr>
+            <th>序号</th>
+            <th>姓名</th>
+            <th>性别</th>
+            <th>操作</th>
+        </tr>
+        <tr id="buttons">
+            <td colspan="4" align="center">
+                <button id="showAddPanel" type="button">添加</button>
+            </td>
+        </tr>
+    </table>
+    <div id="addPanel" style="border:1px solid black;width: 300px;display: none;">
+        <form id="addFrm" action="#" method="get">
+            <table>
+                <tr>
+                    <td>姓名</td>
+                    <td>
+                        <input type="text" name="name" id="name" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>性别</td>
+                    <td>
+                        <input type="radio" name="sex" value="1" checked="checked" />男
+                        <input type="radio" name="sex" value="0" />女
+                    </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        <input id="add" type="button"  value="保存"  />
+                        <input type="reset" value="重置" />
+                        <input id="closeAddPanel" type="button" value="关闭" />
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+    <div id="updatePanel" style="border:1px solid black;width: 300px;display: none;">
+        <form id="updateFrm" action="#" method="get">
+            <table>
+                <tr>
+                    <td>序号</td>
+                    <td>
+                        <input type="text" name="id" readonly="readonly" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>姓名</td>
+                    <td>
+                        <input type="text" name="name" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>性别</td>
+                    <td>
+                        <input type="radio" name="sex" value="1" checked="checked" />男
+                        <input type="radio" name="sex" value="0" />女
+                    </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        <input id="update" type="button"  value="修改"  />
+                        <input type="reset" value="重置" />
+                        <input id="closeUpdatePanel" type="button" value="关闭" />
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+    <script>
+        function loadData(){
+        	$.getJSON("/stumgn/student/all",function(data){
+        		 rendData(data);
+        	});
+        }
+        
+        loadData();
+
+        var rendData = function (dataArray){
+            if(dataArray instanceof Array){
+                $("#stu-dg .student").remove();
+
+                $.each(dataArray,function (index,item){
+                    var tr = $("<tr />",{
+                        class:"student"
+                    });
+
+                    var idCell = $("<td />",{
+                        text:item.id
+                    });
+
+                    var nameCell = $("<td />",{
+                        text:item.name
+                    });
+
+                    var sexCell = $("<td />",{
+                        text:item.sex == 0 ? "女":"男"
+                    });
+
+                    var operationCell = $("<td />");
+                    var delBtn = $("<input />",{
+                        value:"删除",
+                        type:"button",
+                        click:function (){
+                            delStudent(item.id)
+                        }
+                    });
+
+                    var updateBtn = $("<input />",{
+                        value:"修改",
+                        type:"button",
+                        click:function (){
+                            showUpdatePanel(item.id);
+                        }
+                    });
+                    operationCell
+                    .append(delBtn)
+                    .append(updateBtn);
+
+                    tr
+                    .append(idCell)
+                    .append(nameCell)
+                    .append(sexCell)
+                    .append(operationCell)
+                    .insertBefore("#buttons");
+
+                });
+            }
+        };
+       
+
+        $("#showAddPanel").click(function (){
+            $("#addPanel").show();
+        });
+
+        $("#closeAddPanel").click(function (){
+            $("#addPanel").hide();
+        });
+
+        //添加学生
+        $("#add").click(function (){
+            $.post("/stumgn/student/add",$("#addFrm").serialize(),function (data){
+            	if(data.code == 200){
+            		 $("#addFrm")[0].reset();//清空表单
+                     $("#addPanel").hide();//隐藏添加面板
+                     loadData();
+            	}else if(data.code == 400){
+            		alert("添加失败！");
+            	}
+            },"json");
+        });
+
+        //删除学生
+        function delStudent(delId){
+        	// /student/del?id=
+            $.getJSON("/stumgn/student/del",{id:delId},function (data){
+            	if(data.code == 200){
+            		//删除成功，刷新数据表格
+            		 loadData();
+            	}else if(data.code == 300){
+            		//删除失败，给出提示
+            		alert("删除失败！");
+            	}
+            });
+        }
+
+        //将修改数据渲染到修改面板上
+        function showUpdatePanel(getId){
+        	$.getJSON("/stumgn/student/get",{id:getId},function (student){
+        		 //显示修改面板
+                $("#updatePanel").show();
+        		 
+              	//渲染数据
+                $("#updateFrm input[name=id]").val(student.id);
+                $("#updateFrm input[name=name]").val(student.name);
+                if(student.sex == 1){
+                    $("#updateFrm input:radio[name=sex][value=0]").removeAttr("checked");
+                    $("#updateFrm input:radio[name=sex][value=1]").attr("checked","checked");
+                }else if(student.sex == 0){
+                    $("#updateFrm input:radio[name=sex][value=1]").removeAttr("checked");
+                    $("#updateFrm input:radio[name=sex][value=0]").attr("checked","checked");
+                }
+        	});
+        }
+
+        $("#update").click(function (){
+        	$.post("/stumgn/student/update",$("#updateFrm").serialize(),function (data){
+        		if(data.code == 200){
+        			loadData();
+            		closeUpdatePanel();
+        		}else if(data.code == 400){
+        			alert("更新失败！");	
+        		}
+        	},"json");
+        });
+
+        function closeUpdatePanel(){
+            $("#updatePanel").hide();
+        }
+
+        $("#closeUpdatePanel").click(closeUpdatePanel);
+    </script>
+</body>
+</html>

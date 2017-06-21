@@ -1,0 +1,101 @@
+<div id="tb" style="padding: 2px 5px;">
+	<a href="javascript:showStudentAddWin();" class="easyui-linkbutton" iconCls="icon-add">添加</a>
+	<a href="javascript:showStudentUpdateWin();" class="easyui-linkbutton" iconCls="icon-edit">修改</a>
+	<a href="javascript:studentDel();" class="easyui-linkbutton" iconCls="icon-remove">删除</a>
+	查询: 
+	<select class="easyui-combobox" panelHeight="auto" style="width:100px">
+		<option value="java">姓名</option>
+		<option value="c">性别</option>
+	</select>
+	<input class="easyui-textbox" style="width:150px"> 
+	<a href="#" class="easyui-linkbutton" iconCls="icon-search">查询</a>
+</div>
+<div id="studentAddWin"></div>
+<div id="studentUpdateWin"></div>
+<!-- <table class="easyui-datagrid" style="width: 700px; height: 250px" data-options="title:'学生管理',singleSelect:true,fit:true,url:'/stumgn/student/all'"> -->
+<table id="student-dg" class="easyui-datagrid"
+	data-options="toolbar:'#tb',title:'学生管理',singleSelect:true,fit:true">
+	<thead>
+		<tr>
+			<th data-options="field:'id',width:60">序号</th>
+			<th data-options="field:'name',width:100">姓名</th>
+			<th data-options="field:'sex',width:60,formatter:function (value,row,index){
+				return value == 0 ? '女':'男';
+			}">性别</th>
+		</tr>
+	</thead>
+</table>
+<script>
+	$(function() {
+		studentDgInit();
+	});
+	
+	function studentDgInit(){
+		$("#student-dg").datagrid("loading");
+		//页面加载后发送AJAX请求获取数据
+		$.post("/stumgn/student/all", function(data) {
+			//加载并渲染数据
+			$("#student-dg").datagrid("loadData", data);
+			$("#student-dg").datagrid("loaded");
+		}, "json")
+	}
+	
+	//删除学生
+	function studentDel(){
+		//判断用户是否选择了要删除的数据行
+		var row = $("#student-dg").datagrid("getSelected");
+		if(row != null){
+			//如果选择了，则获取该选中行的学生的id，然后发送ajax请求，删除对应id的学生信息，然后刷新数据表格
+			$.post("/stumgn/student/del",{id:row.id},function (result){ 
+				if(result.code == 200){
+					studentDgInit();
+				}else if(result.code == 400){
+					$.messager.alert("提示","删除失败！","error");
+				}
+			},"json");
+		}else{
+			//如果没有选择，则弹窗提示
+			$.messager.alert("提示","请选择要删除的学生！","warning");
+		}
+	}
+	
+	//显示添加窗口
+	function showStudentAddWin(){
+		$("#studentAddWin").window({
+			title:"添加学生",
+			width:400,
+			height:300,
+			collapsible:false,
+			minimizable:false,
+			maximizable:false,
+			resizable:false,
+			modal:true,
+			href:"/stumgn/student-add-frm.html"
+		});
+	}
+	
+	//显示修改窗口
+	function showStudentUpdateWin(){
+		//判断用户是否选择了要删除的数据行
+		var row = $("#student-dg").datagrid("getSelected");
+		if(row != null){
+			$("#studentUpdateWin").window({
+				title:"修改学生",
+				width:400,
+				height:300,
+				collapsible:false,
+				minimizable:false,
+				maximizable:false,
+				resizable:false,
+				modal:true,
+				href:"/stumgn/student-update-frm.html"/*,
+				onLoad:function (){
+					$("#studentUpdateFrm").form("load",row);
+				}*/
+			});
+			localStorage.setItem("updateStudent",JSON.stringify(row));
+		}else{
+			$.messager.alert("提示","请选择要修改的学生！","warning");
+		}
+	}
+</script>

@@ -1,0 +1,45 @@
+<div class="easyui-panel" data-options="border:false,fit:true" style="width: 100%; max-width: 400px; padding: 20px 60px;">
+	<form id="studentUpdateFrm" method="post">
+		<div style="margin-bottom: 20px">
+			<input class="easyui-textbox" name="id" label="序号:" readonly="readonly" labelPosition="top" style="width: 100%; height: 52px">
+		</div>
+		<div style="margin-bottom: 20px">
+			<input class="easyui-textbox" name="name" label="姓名:" labelPosition="top" style="width: 100%; height: 52px">
+		</div>
+		<div style="margin-bottom: 20px">
+			<input type="radio" name="sex" value="1" checked="checked" />男
+			<input type="radio" name="sex" value="0" />女
+		</div>
+		<div>
+			<a href="javascript:studentUpdate();" class="easyui-linkbutton" style="width: 100px; height: 32px">修改</a>
+			<a href="#" class="easyui-linkbutton" style="width: 100px; height: 32px">重置</a>
+		</div>
+	</form>
+</div>
+
+<script>
+	//读取localStorage中可以为updateStudent的数据
+	$(function (){
+		var student = JSON.parse(localStorage.getItem("updateStudent"));
+		if(student){
+			$("#studentUpdateFrm").form("load",student);
+			localStorage.removeItem("updateStudent")
+		}
+	});
+	
+	//修改学生
+	function studentUpdate(){
+		$("#studentUpdateFrm").form("submit",{
+			url:"/stumgn/student/update",
+			success:function (data){
+				var result = JSON.parse(data);
+				if(result.code == 200){
+					studentDgInit();
+					$("#studentUpdateWin").window("close");
+				}else if(result.code == 400){
+					$.messager.alert("提示","修改失败","error");
+				}
+			}
+		});
+	}
+</script>
